@@ -9,11 +9,16 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pulseevent.model.PulseAppModel
+import com.example.pulseevent.service.PulseEventRepository
 import com.example.pulseevent.util.AppConstants.USER_NAME
 import com.example.pulseevent.util.GoogleAuthClient
 import com.example.pulseevent.util.GoogleSignedInUserResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,8 +26,12 @@ import javax.inject.Inject
 class CommonViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val sharedPreferences: SharedPreferences,
-    private val googleAuthClient: GoogleAuthClient
+    private val googleAuthClient: GoogleAuthClient,
+    private val pulseEventRepository: PulseEventRepository
 ) : ViewModel() {
+
+    private val _pulseModelData = MutableStateFlow<PulseAppModel?>(null)
+    val pulseModelData = _pulseModelData.asStateFlow()
 
     fun signInUserViaGoogle(launcher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>) {
         viewModelScope.launch {
@@ -57,6 +66,15 @@ class CommonViewModel @Inject constructor(
         } else {
             sharedPreferences.edit().putString(USER_NAME, username).apply()
             navigateToHomeScreen()
+        }
+    }
+
+    fun getPulseAppModel() {
+        viewModelScope.launch {
+            pulseEventRepository.getPulseAppModel()
+                .collect {
+                    _pulseModelData.value = it
+                }
         }
     }
 

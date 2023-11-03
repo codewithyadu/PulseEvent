@@ -14,7 +14,6 @@ import com.example.pulseevent.navigation.AppNavigation
 import com.example.pulseevent.ui.theme.PulseEventTheme
 import com.example.pulseevent.util.AppConstants.HOME_PAGE_ROUTE
 import com.example.pulseevent.util.AppConstants.LOGIN_SCREEN_ROUTE
-import com.example.pulseevent.util.AppConstants.SHARED_PREF
 import com.example.pulseevent.util.AppConstants.USER_NAME
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

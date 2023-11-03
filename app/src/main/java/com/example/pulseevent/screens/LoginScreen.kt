@@ -32,8 +32,8 @@ import com.example.pulseevent.ui.theme.pulseFontStyle
 
 @Composable
 fun LoginScreen(
-    navigateToHomeScreen: () -> Unit,
-    commonViewModel: CommonViewModel = hiltViewModel()
+    commonViewModel: CommonViewModel,
+    navigateToHomeScreen: () -> Unit
 ) {
 
     val launcher = rememberLauncherForActivityResult(

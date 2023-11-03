@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -40,6 +41,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,7 +54,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberImagePainter
+import com.example.pulseevent.CommonViewModel
 import com.example.pulseevent.R
+import com.example.pulseevent.model.Item
+import com.example.pulseevent.model.Trending
+import com.example.pulseevent.model.Upcoming
 import com.example.pulseevent.ui.theme.PULSE_PRIMARY
 import com.example.pulseevent.ui.theme.PULSE_PRIMARY_LIGHT
 import com.example.pulseevent.ui.theme.PulseWeight
@@ -62,7 +70,11 @@ import java.lang.Thread.yield
 import kotlin.math.absoluteValue
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    commonViewModel: CommonViewModel
+) {
+    val pulseModelData = commonViewModel.pulseModelData.collectAsState()
+
     Column(
         verticalArrangement = Arrangement.Top, modifier = Modifier
             .padding(top = 12.dp)
@@ -70,8 +82,10 @@ fun HomeScreen() {
     ) {
         SearchAndProfile()
         PulseCategory()
-        TrendingEventsHorizontalPager()
-        UpcomingEvent()
+        pulseModelData.value?.let {
+            TrendingEventsHorizontalPager(it.trending)
+            UpcomingEvent(it.upcoming)
+        }
     }
 }
 
@@ -163,34 +177,19 @@ fun PulseCategoryChip(icon: ImageVector, text: String, isSelected: Boolean = fal
 }
 
 @Composable
-fun UpcomingEvent() {
+fun UpcomingEvent(upcoming: Upcoming) {
     Column(modifier = Modifier.padding(vertical = 16.dp)) {
         PulseHeader(text = "Upcoming Event")
-        LazyRow {
-            item {
-                UpcomingEventsCard()
-            }
-            item {
-                UpcomingEventsCard()
-            }
-            item {
-                UpcomingEventsCard()
-            }
-            item {
-                UpcomingEventsCard()
-            }
-            item {
-                UpcomingEventsCard()
-            }
-            item {
-                UpcomingEventsCard()
+        LazyRow() {
+            items(upcoming.items) {
+                UpcomingEventsCard(it)
             }
         }
     }
 }
 
 @Composable
-fun UpcomingEventsCard() {
+fun UpcomingEventsCard(item: Item) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
@@ -199,7 +198,7 @@ fun UpcomingEventsCard() {
         Box {
             Column {
                 Image(
-                    painter = painterResource(id = R.drawable.poster),
+                    painter = rememberImagePainter(item.imageUrl),
                     contentDescription = null,
                     modifier = Modifier
                         .width(270.dp)
@@ -208,13 +207,13 @@ fun UpcomingEventsCard() {
                 )
                 Column(modifier = Modifier.padding(start = 15.dp, top = 28.dp, bottom = 10.dp)) {
                     Text(
-                        text = "Autumn Muse", style = pulseFontStyle(
+                        text = item.title, style = pulseFontStyle(
                             weight = PulseWeight.Bold,
                             fontSize = 28.sp
                         )
                     )
                     Text(
-                        text = "Music Carnival",
+                        text = item.subtitle,
                         style = pulseFontStyle(
                             weight = PulseWeight.Normal,
                             fontSize = 18.sp,
@@ -222,7 +221,7 @@ fun UpcomingEventsCard() {
                         )
                     )
                     Text(
-                        text = "07:00 PM - 08:30 PM", style = pulseFontStyle(
+                        text = item.time, style = pulseFontStyle(
                             weight = PulseWeight.Normal,
                             fontSize = 18.sp,
                             color = PULSE_PRIMARY_LIGHT
@@ -238,7 +237,7 @@ fun UpcomingEventsCard() {
                 elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
             ) {
                 Text(
-                    text = "08",
+                    text = item.date,
                     style = pulseFontStyle(
                         weight = PulseWeight.Bold,
                         color = PULSE_PRIMARY,
@@ -248,7 +247,7 @@ fun UpcomingEventsCard() {
                     modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 4.dp)
                 )
                 Text(
-                    text = "Nov",
+                    text = item.month,
                     style = pulseFontStyle(
                         weight = PulseWeight.Normal,
                         fontSize = 16.sp,
@@ -261,47 +260,11 @@ fun UpcomingEventsCard() {
     }
 }
 
-data class Events(
-    val image: Int,
-    val title: String,
-    val subtitle: String,
-    val time: String,
-    val date: String,
-    val month: String
-)
-
-val trendingEventList = listOf(
-    Events(
-        image = R.drawable.poster,
-        title = "Autumn Muse",
-        subtitle = "Music Carnival",
-        time = "07:00 PM - 8:30 PM",
-        date = "08",
-        month = "Nov."
-    ),
-    Events(
-        image = R.drawable.arijit,
-        title = "Autumn Muse",
-        subtitle = "Music Carnival",
-        time = "07:00 PM - 8:30 PM",
-        date = "08",
-        month = "Nov."
-    ),
-    Events(
-        image = R.drawable.poster,
-        title = "Autumn Muse",
-        subtitle = "Music Carnival",
-        time = "07:00 PM - 8:30 PM",
-        date = "08",
-        month = "Nov."
-    )
-)
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TrendingEventsHorizontalPager() {
+fun TrendingEventsHorizontalPager(trending: Trending) {
     Column(modifier = Modifier.padding(vertical = 16.dp)) {
-        PulseHeader(text = "Trending Events")
+        PulseHeader(text = trending.title)
         val pagerState = rememberPagerState()
 
         LaunchedEffect(Unit) {
@@ -310,17 +273,17 @@ fun TrendingEventsHorizontalPager() {
                 delay(3000)
                 pagerState.animateScrollToPage(
                     animationSpec = tween(durationMillis = 3000),
-                    page = (pagerState.currentPage + 1) % (trendingEventList.size)
+                    page = (pagerState.currentPage + 1) % (trending.items.size)
                 )
             }
         }
 
         HorizontalPager(
-            pageCount = trendingEventList.size, state = pagerState, modifier = Modifier
+            pageCount = trending.items.size, state = pagerState, modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp)
         ) {
-            TrendingEventsCard(events = trendingEventList[it], modifier = Modifier.pagerFadeTransition(
+            TrendingEventsCard(item = trending.items[it], modifier = Modifier.pagerFadeTransition(
                 page = it, pagerState = pagerState
             ))
         }
@@ -329,7 +292,7 @@ fun TrendingEventsHorizontalPager() {
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            repeat(trendingEventList.size) { iteration ->
+            repeat(trending.items.size) { iteration ->
                 val color = if (pagerState.currentPage == iteration) PULSE_PRIMARY else Color.LightGray
                 Box(
                     modifier = Modifier
@@ -358,7 +321,7 @@ fun PagerState.calculateCurrentOffsetForPage(page: Int): Float {
 
 
 @Composable
-fun TrendingEventsCard(events: Events, modifier: Modifier) {
+fun TrendingEventsCard(item: Item, modifier: Modifier) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
@@ -367,7 +330,7 @@ fun TrendingEventsCard(events: Events, modifier: Modifier) {
         Box {
             Column {
                 Image(
-                    painter = painterResource(id = events.image),
+                    painter = rememberImagePainter(item.imageUrl),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -376,13 +339,13 @@ fun TrendingEventsCard(events: Events, modifier: Modifier) {
                 )
                 Column(modifier = Modifier.padding(start = 15.dp, top = 28.dp, bottom = 10.dp)) {
                     Text(
-                        text = "Autumn Muse", style = pulseFontStyle(
+                        text = item.title, style = pulseFontStyle(
                             weight = PulseWeight.Bold,
                             fontSize = 28.sp
                         )
                     )
                     Text(
-                        text = "Music Carnival",
+                        text = item.subtitle,
                         style = pulseFontStyle(
                             weight = PulseWeight.Normal,
                             fontSize = 18.sp,
@@ -390,7 +353,7 @@ fun TrendingEventsCard(events: Events, modifier: Modifier) {
                         )
                     )
                     Text(
-                        text = "07:00 PM - 08:30 PM", style = pulseFontStyle(
+                        text = item.time, style = pulseFontStyle(
                             weight = PulseWeight.Normal,
                             fontSize = 18.sp,
                             color = PULSE_PRIMARY_LIGHT
@@ -406,7 +369,7 @@ fun TrendingEventsCard(events: Events, modifier: Modifier) {
                 elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
             ) {
                 Text(
-                    text = "08",
+                    text = item.date,
                     style = pulseFontStyle(
                         weight = PulseWeight.Bold,
                         color = PULSE_PRIMARY,
@@ -416,7 +379,7 @@ fun TrendingEventsCard(events: Events, modifier: Modifier) {
                     modifier = Modifier.padding(start = 15.dp, end = 15.dp, top = 4.dp)
                 )
                 Text(
-                    text = "Nov",
+                    text = item.month,
                     style = pulseFontStyle(
                         weight = PulseWeight.Normal,
                         fontSize = 16.sp,
@@ -443,6 +406,6 @@ fun PulseHeader(text: String) {
 @Preview
 fun SearchAndProfilePreview() {
     Surface(color = Color.White) {
-        HomeScreen()
+        HomeScreen(hiltViewModel())
     }
 }
