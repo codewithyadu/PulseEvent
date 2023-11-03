@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "64544653947",
+    "project_id": "events-app-e8462",
+    "storage_bucket": "events-app-e8462.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:64544653947:android:4946db74d0942e998f98de",
+        "android_client_info": {
+          "package_name": "com.example.pulseevent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOHsEuscul90rhEhzOtyez66wROwMgCaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
