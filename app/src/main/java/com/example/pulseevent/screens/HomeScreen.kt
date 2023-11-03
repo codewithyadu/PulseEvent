@@ -4,6 +4,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -71,7 +73,8 @@ import kotlin.math.absoluteValue
 
 @Composable
 fun HomeScreen(
-    commonViewModel: CommonViewModel
+    commonViewModel: CommonViewModel,
+    navigateToDetailsScreen: (String) -> Unit
 ) {
     val pulseModelData = commonViewModel.pulseModelData.collectAsState()
 
@@ -83,9 +86,9 @@ fun HomeScreen(
         SearchAndProfile()
         PulseCategory()
         pulseModelData.value?.let {
-            TrendingEventsHorizontalPager(it.trending)
-            UpcomingEvent(it.upcoming)
-        }
+            TrendingEventsHorizontalPager(it.trending, navigateToDetailsScreen)
+            UpcomingEvent(it.upcoming, navigateToDetailsScreen)
+        } ?: CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 20.dp))
     }
 }
 
@@ -177,23 +180,27 @@ fun PulseCategoryChip(icon: ImageVector, text: String, isSelected: Boolean = fal
 }
 
 @Composable
-fun UpcomingEvent(upcoming: Upcoming) {
+fun UpcomingEvent(upcoming: Upcoming, navigateToDetailsScreen: (String) -> Unit) {
     Column(modifier = Modifier.padding(vertical = 16.dp)) {
         PulseHeader(text = "Upcoming Event")
         LazyRow() {
             items(upcoming.items) {
-                UpcomingEventsCard(it)
+                UpcomingEventsCard(it, navigateToDetailsScreen)
             }
         }
     }
 }
 
 @Composable
-fun UpcomingEventsCard(item: Item) {
+fun UpcomingEventsCard(item: Item, navigateToDetailsScreen: (String) -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        modifier = Modifier.padding(start = 16.dp, top = 16.dp)
+        modifier = Modifier
+            .padding(start = 16.dp, top = 16.dp)
+            .clickable {
+                navigateToDetailsScreen(item.title)
+            }
     ) {
         Box {
             Column {
@@ -262,7 +269,7 @@ fun UpcomingEventsCard(item: Item) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TrendingEventsHorizontalPager(trending: Trending) {
+fun TrendingEventsHorizontalPager(trending: Trending, navigateToDetailsScreen: (String) -> Unit) {
     Column(modifier = Modifier.padding(vertical = 16.dp)) {
         PulseHeader(text = trending.title)
         val pagerState = rememberPagerState()
@@ -285,7 +292,7 @@ fun TrendingEventsHorizontalPager(trending: Trending) {
         ) {
             TrendingEventsCard(item = trending.items[it], modifier = Modifier.pagerFadeTransition(
                 page = it, pagerState = pagerState
-            ))
+            ), navigateToDetailsScreen)
         }
         Row(
             Modifier
@@ -321,11 +328,13 @@ fun PagerState.calculateCurrentOffsetForPage(page: Int): Float {
 
 
 @Composable
-fun TrendingEventsCard(item: Item, modifier: Modifier) {
+fun TrendingEventsCard(item: Item, modifier: Modifier, navigateToDetailsScreen: (String) -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        modifier = modifier
+        modifier = modifier.then(Modifier.clickable {
+            navigateToDetailsScreen(item.title)
+        })
     ) {
         Box {
             Column {
@@ -400,12 +409,4 @@ fun PulseHeader(text: String) {
             fontSize = 24.sp
         ), modifier = Modifier.padding(start = 12.dp)
     )
-}
-
-@Composable
-@Preview
-fun SearchAndProfilePreview() {
-    Surface(color = Color.White) {
-        HomeScreen(hiltViewModel())
-    }
 }

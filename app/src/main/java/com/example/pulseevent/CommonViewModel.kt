@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pulseevent.model.Item
 import com.example.pulseevent.model.PulseAppModel
 import com.example.pulseevent.service.PulseEventRepository
 import com.example.pulseevent.util.AppConstants.USER_NAME
@@ -75,6 +76,14 @@ class CommonViewModel @Inject constructor(
                 .collect {
                     _pulseModelData.value = it
                 }
+        }
+    }
+
+    fun getEventDetails(eventName: String): Item? {
+        return _pulseModelData.value?.trending?.items?.firstOrNull {
+            it.title == eventName
+        } ?: _pulseModelData.value?.upcoming?.items?.firstOrNull {
+            it.title == eventName
         }
     }
 

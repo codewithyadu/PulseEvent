@@ -1,6 +1,8 @@
 package com.example.pulseevent.service
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class PulseEventRepository @Inject constructor(private val pulseEventService: PulseEventService) {
@@ -14,5 +16,5 @@ class PulseEventRepository @Inject constructor(private val pulseEventService: Pu
         if (response.isSuccessful) {
             emit(response.body())
         }
-    }
+    }.flowOn(Dispatchers.IO)
 }

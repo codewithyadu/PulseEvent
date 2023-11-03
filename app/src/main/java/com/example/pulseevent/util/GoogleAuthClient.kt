@@ -33,7 +33,7 @@ class GoogleAuthClient @Inject constructor(
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
         return try {
             val user = firebaseAuth.signInWithCredential(googleCredentials).await().user
-            if (true) {
+            if (isSRMEmail(user?.email)) {
                 GoogleSignedInUserResult(
                     googleSignedInUserData = user?.run {
                         GoogleSignedInUserData(
